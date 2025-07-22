@@ -14,13 +14,10 @@
 
 #include <vector>
 #include <utility>
-#include <unicode/uchar.h>
-#include <unicode/unistr.h> 
 #include <stdexcept>
 #include "decode.hpp"
 
 using namespace std;
-using namespace icu;
 
 /**
  * @brief Classe que implementa uma simulacao de um processador RISC
@@ -36,9 +33,9 @@ public:
         Z = C = false; 
     }
 
-    void run(vector<vector<UnicodeString>> instrucoes){
+    void run(vector<vector<string>> instrucoes){
         for(int i = 0; i < instrucoes.size(); i = regs[15]){
-            vector<UnicodeString> individual_instructions = instrucoes[i];
+            vector<string> individual_instructions = instrucoes[i];
             if(individual_instructions[0] == "0000"){
                 JMP(individual_instructions); 
             }else if(individual_instructions[0] == "LDR"){
@@ -75,21 +72,15 @@ public:
         }  
     } 
 
-    void NOP(){
-        string out = "REGISTRADORES:\n";
-        for(int i = 0; i < 14; i++){
-            out += "R" + to_string(i) + ":     0x" + decToHex(regs[i]) + "\n";
-        }
-        out += "SP:     0x" + to_string(regs[14]) + "\n";
-        out += "PC:     0x" + to_string(regs[15]) + "\n\n";
-        if(){
-            out += "Memoria de Dados:\n";
-        }
+private:
+    vector<size_t> regs;
+    vector<size_t> mem;
+    size_t IR;
+    bool Z;
+    bool C;
+    vector<int> positions;
 
-
-    }
-
-    void JMP(vector<UnicodeString>& instruction){
+    void JMP(vector<string>& instruction){
         IR = regs[15];
         if(instruction[1] == "0000" && instruction[2] == "0000" && instruction[3] == "0000"){
             NOP();
@@ -97,9 +88,7 @@ public:
         }else{
             size_t jmp = 0;
             for(int i = 1; i < instruction.size(); i++){
-                string str;
-                instruction[i].toUTF8String(str);
-                jmp += biToDec(str);
+                jmp += biToDec(instruction[i]);
                 if(jmp > 4095){
                     throw runtime_error("limite do imediato excedido");
                 }
@@ -108,13 +97,18 @@ public:
         }
     }
 
-private:
-    vector<size_t> regs;
-    vector<size_t> mem;
-    size_t IR;
-    bool Z;
-    bool C;
-    vector<int> positions;
+    void NOP(){
+        string out = "REGISTRADORES:\n";
+        for(int i = 0; i < 14; i++){
+            out += "R" + to_string(i) + ":     0x" + decToHex(regs[i]) + "\n";
+        }
+        out += "SP:     0x" + to_string(regs[14]) + "\n";
+        out += "PC:     0x" + to_string(regs[15]) + "\n\n";
+        // if(){
+        //     out += "Memoria de Dados:\n";
+        // }
+
+    }
 
 };
 

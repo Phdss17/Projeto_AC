@@ -6,45 +6,24 @@
 #include "decode.hpp"
 #include <stdexcept>
 
-// ICU 
-#include <unicode/unistr.h> 
-#include <unicode/brkiter.h>
-#include <unicode/uchar.h>
+using namespace std;
 
-using namespace std; 
-using namespace icu;
-
-vector<UnicodeString> split_words(const UnicodeString txt){
-    Locale locale("pt", "BR");
-    UErrorCode status = U_ZERO_ERROR;
-
-    BreakIterator* wordIterator = BreakIterator::createWordInstance(locale, status);
-    vector<UnicodeString> words;
-
-    if(U_FAILURE(status)) {
-        std::cerr << "Erro ao criar BreakIterator: " << u_errorName(status) << std::endl;
-        return words;
-    }
-
-    wordIterator->setText(txt);
-    int32_t start = wordIterator->first();
-    int32_t end = wordIterator->next();
-    
-    while(end != BreakIterator::DONE) {
-        UnicodeString word;
-        txt.extractBetween(start, end, word);
-
-        if(word != ":" && word != "," && word != "#" && word != " " && word != "[" && word != "]"){
-            words.push_back(word);
+vector<string> split_words(string txt){
+    vector<string> words;
+    string word = "";
+    for(int i = 0; i < txt.length(); i++){
+        char aux = txt.at(i);
+        if(aux != ' ' && aux != 'R' && aux != ':' && aux != '#' && aux != '[' && aux != ']' && aux != ','){
+            if(aux == 'x'){ word = ""; }else{ word += aux; }
+        }else{
+            if(word != ""){ words.push_back(word); }
+            word = "";
         }
-        
-        start = end;
-        end = wordIterator->next();
     }
-    delete wordIterator;
+    words.push_back(word);
+        
     return words;
 }
-
 
 int main(int argc, char* argv[]){
     vector<string> argumentos;
@@ -65,36 +44,33 @@ int main(int argc, char* argv[]){
         throw runtime_error("Não foi possível abrir o arquivo para leitura.");
     }
 
-    string indice;
-    string valor;
-    vector<vector<UnicodeString>> instrucoes;
+    string line;
+    vector<vector<string>> instrucoes;
     
-    while (getline(entrada, indice)) {
-        UnicodeString aux = UnicodeString::fromUTF8(indice);
-        
-        vector<UnicodeString> individual_words = split_words(aux);
+    while (getline(entrada, line)) {
+        vector<string> individual_words = split_words(line);
         
         if(ishexa){ 
             hex_treat(individual_words);
             hex_binary(individual_words); 
         }else{
-            assembly_treat(individual_words); 
             assembly_binary(individual_words);
         }
         instrucoes.push_back(individual_words);
     }
+       
 
-    Processador proc;
-    try{
-        proc.run(instrucoes);
-    }catch(const std::exception& e){
-        cerr << e.what() << endl;
-    }
+    // Processador proc;
+    // try{
+    //     proc.run(instrucoes);
+    // }catch(const std::exception& e){
+    //     cerr << e.what() << endl;
+    // }
 
     entrada.close();
         
     ofstream saida("results");
-
+    
     if (!saida) {
         throw runtime_error("Não foi possível criar o arquivo.");
     }

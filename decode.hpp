@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <unicode/uchar.h>
-#include <unicode/unistr.h> 
 #include <string>
 #include <stack>
 #include <queue>
@@ -12,28 +10,19 @@
 #include <stdexcept>
 
 using namespace std;
-using namespace icu;
 
 
-void hex_treat(vector<UnicodeString>& hexWords){
-    UnicodeString auxs = hexWords[1];
+void hex_treat(vector<string>& hexWords){
+    string auxs = hexWords[1];
     hexWords.clear();
-    for(int i = 2; i < auxs.length(); i++){
-        UChar32 auxc = auxs.charAt(i);
-        hexWords.push_back(UnicodeString(auxc));
+    for(int i = 0; i < auxs.length(); i++){
+        string str = "";
+        str += auxs.at(i);
+        hexWords.push_back(str);
     }
 }
 
-void assembly_treat(vector<UnicodeString>& assemblyWords){
-    for(int i = 1; i < assemblyWords.size(); i++){
-        if(assemblyWords[i].charAt(0) == 'R'){
-            UnicodeString aux = assemblyWords[i].charAt(1); 
-            assemblyWords[i] = aux;
-        }
-    }
-}
-
-void charToBi(UnicodeString& aux){
+void charToBi(string& aux){
     if(aux == "A"){
         aux = "1010";
     }else if(aux == "B"){
@@ -49,7 +38,7 @@ void charToBi(UnicodeString& aux){
     }
 }
 
-void numHexToBi(UnicodeString& aux){
+void numHexToBi(string& aux){
     if(aux == "0"){
         aux = "0000";   
     }else if(aux == "1"){
@@ -141,7 +130,7 @@ string decToHex(size_t num){
     return out;
 }
 
-void assembly_binary(vector<UnicodeString>& toBinary){
+void assembly_binary(vector<string>& toBinary){
     if(toBinary[0] == "JMP"){
         toBinary[0] = "0000";   
     }else if(toBinary[0] == "JEQ" || toBinary[0] == "JNQ" || toBinary[0] == "JLT" || toBinary[0] == "JGE"){
@@ -178,14 +167,11 @@ void assembly_binary(vector<UnicodeString>& toBinary){
         throw invalid_argument("Instrução fora do escopo");
     }
     for(int i = 1; i < toBinary.size(); i++){
-        string utf;
-        toBinary[i].toUTF8String(utf);
-        decToBi(utf);
-        toBinary[i] = UnicodeString::fromUTF8(utf);
+        decToBi(toBinary[i]);
     }
 }
 
-void hex_binary(vector<UnicodeString>& toBinary){
+void hex_binary(vector<string>& toBinary){
     for(int i = 0; i < toBinary.size(); i++){
         numHexToBi(toBinary[i]);
         charToBi(toBinary[i]);
