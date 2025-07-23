@@ -14,13 +14,10 @@
 
 #include <vector>
 #include <utility>
-#include <unicode/uchar.h>
-#include <unicode/unistr.h> 
 #include <stdexcept>
 #include "decode.hpp"
 
 using namespace std;
-using namespace icu;
 
 /**
  * @brief Classe que implementa uma simulacao de um processador RISC
@@ -36,77 +33,43 @@ public:
         Z = C = false; 
     }
 
-    void run(vector<vector<UnicodeString>> instrucoes){
-        for(int i = 0; i < instrucoes.size(); i = regs[15]){
-            vector<UnicodeString> individual_instructions = instrucoes[i];
-            if(individual_instructions[0] == "0000"){
-                JMP(individual_instructions); 
-            }else if(individual_instructions[0] == "LDR"){
+    void run(vector<string> instrucoes){
+        // for(int i = 0; i < instrucoes.size(); i = regs[15]){
+        //     if( == "0000"){
+        //         JMP(individual_instructions); 
+        //     }else if(individual_instructions[0] == "LDR"){
 
-            }else if(individual_instructions[0] == "0011"){
+        //     }else if(individual_instructions[0] == "0011"){
                 
-            }else if(individual_instructions[0] == "MOV"){
+        //     }else if(individual_instructions[0] == "MOV"){
             
-            }else if(individual_instructions[0] == "ADD"){
+        //     }else if(individual_instructions[0] == "ADD"){
             
-            }else if(individual_instructions[0] == "ADDI"){
+        //     }else if(individual_instructions[0] == "ADDI"){
             
-            }else if(individual_instructions[0] == "SUB"){
+        //     }else if(individual_instructions[0] == "SUB"){
             
-            }else if(individual_instructions[0] == "SUBI"){
+        //     }else if(individual_instructions[0] == "SUBI"){
             
-            }else if(individual_instructions[0] == "AND"){
+        //     }else if(individual_instructions[0] == "AND"){
             
-            }else if(individual_instructions[0] == "OR"){
+        //     }else if(individual_instructions[0] == "OR"){
             
-            }else if(individual_instructions[0] == "SHR"){
+        //     }else if(individual_instructions[0] == "SHR"){
             
-            }else if(individual_instructions[0] == "SHL"){
+        //     }else if(individual_instructions[0] == "SHL"){
             
-            }else if(individual_instructions[0] == "CMP"){
+        //     }else if(individual_instructions[0] == "CMP"){
             
-            }else if(individual_instructions[0] == "PUSH"){
+        //     }else if(individual_instructions[0] == "PUSH"){
             
-            }else if(individual_instructions[0] == "POP"){
+        //     }else if(individual_instructions[0] == "POP"){
             
-            }else{
+        //     }else{
             
-            }
-        }  
+        //     }
+        // }  
     } 
-
-    void NOP(){
-        string out = "REGISTRADORES:\n";
-        for(int i = 0; i < 14; i++){
-            out += "R" + to_string(i) + ":     0x" + decToHex(regs[i]) + "\n";
-        }
-        out += "SP:     0x" + to_string(regs[14]) + "\n";
-        out += "PC:     0x" + to_string(regs[15]) + "\n\n";
-        if(){
-            out += "Memoria de Dados:\n";
-        }
-
-
-    }
-
-    void JMP(vector<UnicodeString>& instruction){
-        IR = regs[15];
-        if(instruction[1] == "0000" && instruction[2] == "0000" && instruction[3] == "0000"){
-            NOP();
-            regs[15]++;
-        }else{
-            size_t jmp = 0;
-            for(int i = 1; i < instruction.size(); i++){
-                string str;
-                instruction[i].toUTF8String(str);
-                jmp += biToDec(str);
-                if(jmp > 4095){
-                    throw runtime_error("limite do imediato excedido");
-                }
-            }
-            regs[15] = jmp;
-        }
-    }
 
 private:
     vector<size_t> regs;
@@ -115,6 +78,36 @@ private:
     bool Z;
     bool C;
     vector<int> positions;
+
+    void JMP(vector<string>& instruction){
+        IR = regs[15];
+        if(instruction[1] == "0000" && instruction[2] == "0000" && instruction[3] == "0000"){
+            NOP();
+            regs[15]++;
+        }else{
+            size_t jmp = 0;
+            for(int i = 1; i < instruction.size(); i++){
+                jmp += biToDec(instruction[i]);
+                if(jmp > 4095){
+                    throw runtime_error("limite do imediato excedido");
+                }
+            }
+            regs[15] = jmp;
+        }
+    }
+
+    void NOP(){
+        string out = "REGISTRADORES:\n";
+        for(int i = 0; i < 14; i++){
+            out += "R" + to_string(i) + ":     0x" + decToHex(regs[i]) + "\n";
+        }
+        out += "SP:     0x" + to_string(regs[14]) + "\n";
+        out += "PC:     0x" + to_string(regs[15]) + "\n\n";
+        // if(){
+        //     out += "Memoria de Dados:\n";
+        // }
+
+    }
 
 };
 

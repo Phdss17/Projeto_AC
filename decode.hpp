@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <unicode/uchar.h>
-#include <unicode/unistr.h> 
 #include <string>
 #include <stack>
 #include <queue>
@@ -12,28 +10,81 @@
 #include <stdexcept>
 
 using namespace std;
-using namespace icu;
 
-
-void hex_treat(vector<UnicodeString>& hexWords){
-    UnicodeString auxs = hexWords[1];
+void hex_treat(vector<string>& hexWords){
+    string auxs = hexWords[1];
     hexWords.clear();
-    for(int i = 2; i < auxs.length(); i++){
-        UChar32 auxc = auxs.charAt(i);
-        hexWords.push_back(UnicodeString(auxc));
+    for(int i = 0; i < auxs.length(); i++){
+        string str = "";
+        str += auxs.at(i);
+        hexWords.push_back(str);
     }
 }
 
-void assembly_treat(vector<UnicodeString>& assemblyWords){
+void assembly_treat(vector<string>& assemblyWords){
+    string aux = "";
     for(int i = 1; i < assemblyWords.size(); i++){
-        if(assemblyWords[i].charAt(0) == 'R'){
-            UnicodeString aux = assemblyWords[i].charAt(1); 
-            assemblyWords[i] = aux;
+        for(int j = 0; j < assemblyWords[i].length(); j++){
+            if(assemblyWords[i].at(j) != 'R'){
+                aux += assemblyWords[i].at(j);
+            }
+        }
+        assemblyWords[i] = aux;
+        aux = "";
+    }
+}
+
+void toPadronize(vector<string>& toPadronize){
+    if(toPadronize.size() < 4){
+        if(toPadronize[0] == "2"){
+            toPadronize.push_back("1");
+        }else if(toPadronize[0] == "3" || toPadronize[0] == "D"){
+            string aux = toPadronize[1];
+            toPadronize[1] = "0";
+            toPadronize.push_back(aux);
+        }else if(toPadronize[0] == "E"){
+            string aux = toPadronize[1];
+            toPadronize[1] = toPadronize[2] = "0";
+            toPadronize.push_back(aux);
+        }else if(toPadronize[0] == "F"){
+            int i;
+            string aux;
+            if(toPadronize.size() == 1){ 
+                i = 0; 
+                aux = "F"; 
+            }else{ 
+                i = 1; 
+                aux = "0"; 
+            }
+            for(i; i < 3; i++){
+                toPadronize.push_back(aux);
+            }
+        }else{
+            if(toPadronize[0] == "0" || toPadronize[0] == "1"){
+                if(toPadronize[1].length() < 3){
+                    int i = 3 - toPadronize[1].length();
+                    for(int j = 1; j <= i; j++){
+                        string aux = toPadronize[j];
+                        toPadronize[j] = "0";
+                        toPadronize.push_back(aux);
+                    }
+                }else if(toPadronize[1].length() > 3){
+                    throw invalid_argument("Instrução fora do escopo");
+                }
+            }else{
+                if(toPadronize[2].length() < 2){
+                    string aux = toPadronize[2];
+                    toPadronize[2] = "0";
+                    toPadronize.push_back(aux);
+                }else if(toPadronize[2].length() > 2){
+                    throw invalid_argument("Instrução fora do escopo");
+                }
+            }
         }
     }
 }
 
-void charToBi(UnicodeString& aux){
+void charToBi(string& aux){
     if(aux == "A"){
         aux = "1010";
     }else if(aux == "B"){
@@ -49,7 +100,7 @@ void charToBi(UnicodeString& aux){
     }
 }
 
-void numHexToBi(UnicodeString& aux){
+void numHexToBi(string& aux){
     if(aux == "0"){
         aux = "0000";   
     }else if(aux == "1"){
@@ -99,7 +150,7 @@ void decToBi(string& num){
 
 size_t biToDec(string num){
     queue<char> queue;
-    for(int i = num.length()-1; i > 0; i--){
+    for(int i = num.length()-1; i >= 0; i--){
         queue.push(num.at(i));
     }
     int aux;
@@ -113,6 +164,9 @@ size_t biToDec(string num){
 } 
 
 string decToHex(size_t num){
+    if(num == 0){
+        return "0";
+    }
     stack<int> stack;
     while(num != 0){
         stack.push(num % 16);
@@ -141,55 +195,57 @@ string decToHex(size_t num){
     return out;
 }
 
-void assembly_binary(vector<UnicodeString>& toBinary){
-    if(toBinary[0] == "JMP"){
-        toBinary[0] = "0000";   
-    }else if(toBinary[0] == "JEQ" || toBinary[0] == "JNQ" || toBinary[0] == "JLT" || toBinary[0] == "JGE"){
-        toBinary[0] = "0001";       
-    }else if(toBinary[0] == "LDR"){ 
-        toBinary[0] = "0010";
-    }else if(toBinary[0] == "STR"){
-        toBinary[0] = "0011";
-    }else if(toBinary[0] == "MOV"){
-        toBinary[0] = "0100";
-    }else if(toBinary[0] == "ADD"){
-        toBinary[0] = "0101";
-    }else if(toBinary[0] == "ADDI"){
-        toBinary[0] = "0110";
-    }else if(toBinary[0] == "SUB"){
-        toBinary[0] = "0111";
-    }else if(toBinary[0] == "SUBI"){
-        toBinary[0] = "1000";
-    }else if(toBinary[0] == "AND"){
-        toBinary[0] = "1001";
-    }else if(toBinary[0] == "OR"){
-        toBinary[0] = "1010";
-    }else if(toBinary[0] == "SHR"){
-        toBinary[0] = "1011";
-    }else if(toBinary[0] == "SHL"){
-        toBinary[0] = "1100";
-    }else if(toBinary[0] == "CMP"){
-        toBinary[0] = "1101";
-    }else if(toBinary[0] == "PUSH"){
-        toBinary[0] = "1110";
-    }else if(toBinary[0] == "POP"  || toBinary[0] == "HALT"){
-        toBinary[0] = "1111";
+void assembly_Hex(vector<string>& toHex){
+    if(toHex[0] == "JMP"){
+        toHex[0] = "0";   
+    }else if(toHex[0] == "JEQ" || toHex[0] == "JNQ" || toHex[0] == "JLT" || toHex[0] == "JGE"){
+        toHex[0] = "1";       
+    }else if(toHex[0] == "LDR"){ 
+        toHex[0] = "2";
+    }else if(toHex[0] == "STR"){
+        toHex[0] = "3";
+    }else if(toHex[0] == "MOV"){
+        toHex[0] = "4";
+    }else if(toHex[0] == "ADD"){
+        toHex[0] = "5";
+    }else if(toHex[0] == "ADDI"){
+        toHex[0] = "6";
+    }else if(toHex[0] == "SUB"){
+        toHex[0] = "7";
+    }else if(toHex[0] == "SUBI"){
+        toHex[0] = "8";
+    }else if(toHex[0] == "AND"){
+        toHex[0] = "9";
+    }else if(toHex[0] == "OR"){
+        toHex[0] = "A";
+    }else if(toHex[0] == "SHR"){
+        toHex[0] = "B";
+    }else if(toHex[0] == "SHL"){
+        toHex[0] = "C";
+    }else if(toHex[0] == "CMP"){
+        toHex[0] = "D";
+    }else if(toHex[0] == "PUSH"){
+        toHex[0] = "E";
+    }else if(toHex[0] == "POP"  || toHex[0] == "HALT"){
+        toHex[0] = "F";
     }else{
         throw invalid_argument("Instrução fora do escopo");
     }
-    for(int i = 1; i < toBinary.size(); i++){
-        string utf;
-        toBinary[i].toUTF8String(utf);
-        decToBi(utf);
-        toBinary[i] = UnicodeString::fromUTF8(utf);
+    for(int i = 1; i < toHex.size(); i++){
+        toHex[i] = decToHex(stoi(toHex[i]));
     }
 }
 
-void hex_binary(vector<UnicodeString>& toBinary){
+string hex_binary(vector<string> toBinary){
     for(int i = 0; i < toBinary.size(); i++){
         numHexToBi(toBinary[i]);
         charToBi(toBinary[i]);
     }
+    string aux = "";
+    for(int i = 0; i < toBinary.size(); i++){
+        aux += toBinary[i];
+    }
+    return aux;
 }
 
 #endif
