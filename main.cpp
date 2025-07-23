@@ -13,14 +13,16 @@ vector<string> split_words(string txt){
     string word = "";
     for(int i = 0; i < txt.length(); i++){
         char aux = txt.at(i);
-        if(aux != ' ' && aux != 'R' && aux != ':' && aux != '#' && aux != '[' && aux != ']' && aux != ','){
+        if(aux != ' ' && aux != ':' && aux != '#' && aux != '[' && aux != ']' && aux != ','){
             if(aux == 'x'){ word = ""; }else{ word += aux; }
         }else{
             if(word != ""){ words.push_back(word); }
             word = "";
         }
     }
-    words.push_back(word);
+    if(word != ""){
+        words.push_back(word);
+    }
         
     return words;
 }
@@ -45,18 +47,21 @@ int main(int argc, char* argv[]){
     }
 
     string line;
-    vector<vector<string>> instrucoes;
+    vector<string> instrucoes;
     
     while (getline(entrada, line)) {
         vector<string> individual_words = split_words(line);
-        
-        if(ishexa){ 
-            hex_treat(individual_words);
-            hex_binary(individual_words); 
+        string instrucao;
+        if(!ishexa){ 
+            assembly_treat(individual_words);
+            assembly_Hex(individual_words);
+            toPadronize(individual_words);
         }else{
-            assembly_binary(individual_words);
+            hex_treat(individual_words);
         }
-        instrucoes.push_back(individual_words);
+        instrucao = hex_binary(individual_words); 
+        instrucoes.push_back(instrucao);
+        cout << instrucao << endl;
     }
        
 
@@ -70,7 +75,7 @@ int main(int argc, char* argv[]){
     entrada.close();
         
     ofstream saida("results");
-    
+
     if (!saida) {
         throw runtime_error("Não foi possível criar o arquivo.");
     }

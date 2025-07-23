@@ -33,43 +33,42 @@ public:
         Z = C = false; 
     }
 
-    void run(vector<vector<string>> instrucoes){
-        for(int i = 0; i < instrucoes.size(); i = regs[15]){
-            vector<string> individual_instructions = instrucoes[i];
-            if(individual_instructions[0] == "0000"){
-                JMP(individual_instructions); 
-            }else if(individual_instructions[0] == "LDR"){
+    void run(vector<string> instrucoes){
+        // for(int i = 0; i < instrucoes.size(); i = regs[15]){
+        //     if( == "0000"){
+        //         JMP(individual_instructions); 
+        //     }else if(individual_instructions[0] == "LDR"){
 
-            }else if(individual_instructions[0] == "0011"){
+        //     }else if(individual_instructions[0] == "0011"){
                 
-            }else if(individual_instructions[0] == "MOV"){
+        //     }else if(individual_instructions[0] == "MOV"){
             
-            }else if(individual_instructions[0] == "ADD"){
+        //     }else if(individual_instructions[0] == "ADD"){
             
-            }else if(individual_instructions[0] == "ADDI"){
+        //     }else if(individual_instructions[0] == "ADDI"){
             
-            }else if(individual_instructions[0] == "SUB"){
+        //     }else if(individual_instructions[0] == "SUB"){
             
-            }else if(individual_instructions[0] == "SUBI"){
+        //     }else if(individual_instructions[0] == "SUBI"){
             
-            }else if(individual_instructions[0] == "AND"){
+        //     }else if(individual_instructions[0] == "AND"){
             
-            }else if(individual_instructions[0] == "OR"){
+        //     }else if(individual_instructions[0] == "OR"){
             
-            }else if(individual_instructions[0] == "SHR"){
+        //     }else if(individual_instructions[0] == "SHR"){
             
-            }else if(individual_instructions[0] == "SHL"){
+        //     }else if(individual_instructions[0] == "SHL"){
             
-            }else if(individual_instructions[0] == "CMP"){
+        //     }else if(individual_instructions[0] == "CMP"){
             
-            }else if(individual_instructions[0] == "PUSH"){
+        //     }else if(individual_instructions[0] == "PUSH"){
             
-            }else if(individual_instructions[0] == "POP"){
+        //     }else if(individual_instructions[0] == "POP"){
             
-            }else{
+        //     }else{
             
-            }
-        }  
+        //     }
+        // }  
     } 
 
 private:
