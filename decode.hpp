@@ -34,55 +34,86 @@ void assembly_treat(vector<string>& assemblyWords){
     }
 }
 
-void toPadronize(vector<string>& toPadronize){
-    if(toPadronize.size() < 4){
-        if(toPadronize[0] == "2"){
-            toPadronize.push_back("1");
-        }else if(toPadronize[0] == "3" || toPadronize[0] == "D"){
-            string aux = toPadronize[1];
-            toPadronize[1] = "0";
+void LDR(vector<string>& toPadronize){
+    toPadronize.push_back("1");
+}
+
+void STR_CMD(vector<string>& toPadronize){
+    string aux = toPadronize[1];
+    toPadronize[1] = "0";
+    toPadronize.push_back(aux);
+}
+
+void PUSH(vector<string>& toPadronize){
+    string aux = toPadronize[1];
+    toPadronize[1] = toPadronize[2] = "0";
+    toPadronize.push_back(aux);
+}
+
+void POP_HALT(vector<string>& toPadronize){
+    int i;
+    string aux;
+    if(toPadronize.size() == 1){ 
+        i = 0; 
+        aux = "F"; 
+    }else{ 
+        i = 1; 
+        aux = "0"; 
+    }
+    for(i; i < 3; i++){
+        toPadronize.push_back(aux);
+    }
+}
+
+void JMP(vector<string>& toPadronize){
+    if(toPadronize[1].length() > 3){
+        throw invalid_argument("Instrução fora do escopo");
+    }
+    if(toPadronize[1].length() < 3){
+        int i = 3 - toPadronize[1].length();
+        for(int j = 1; j <= i; j++){
+            string aux = toPadronize[j];
+            toPadronize[j] = "0";
             toPadronize.push_back(aux);
-        }else if(toPadronize[0] == "E"){
-            string aux = toPadronize[1];
-            toPadronize[1] = toPadronize[2] = "0";
-            toPadronize.push_back(aux);
-        }else if(toPadronize[0] == "F"){
-            int i;
-            string aux;
-            if(toPadronize.size() == 1){ 
-                i = 0; 
-                aux = "F"; 
-            }else{ 
-                i = 1; 
-                aux = "0"; 
-            }
-            for(i; i < 3; i++){
-                toPadronize.push_back(aux);
-            }
-        }else{
-            if(toPadronize[0] == "0" || toPadronize[0] == "1"){
-                if(toPadronize[1].length() < 3){
-                    int i = 3 - toPadronize[1].length();
-                    for(int j = 1; j <= i; j++){
-                        string aux = toPadronize[j];
-                        toPadronize[j] = "0";
-                        toPadronize.push_back(aux);
-                    }
-                }else if(toPadronize[1].length() > 3){
-                    throw invalid_argument("Instrução fora do escopo");
-                }
-            }else{
-                if(toPadronize[2].length() < 2){
-                    string aux = toPadronize[2];
-                    toPadronize[2] = "0";
-                    toPadronize.push_back(aux);
-                }else if(toPadronize[2].length() > 2){
-                    throw invalid_argument("Instrução fora do escopo");
-                }
-            }
         }
     }
 }
+
+void MOV(vector<string>& toPadronize){
+    if(toPadronize[2].length() > 2){
+        throw invalid_argument("Instrução fora do escopo");
+    }
+    if(toPadronize[2].length() < 2){
+        string aux = toPadronize[2];
+        toPadronize[2] = "0";
+        toPadronize.push_back(aux);
+    }
+}
+
+void toPadronize(vector<string>& toPadronize){
+    if(toPadronize.size() < 4){
+        if(toPadronize[0] == "2"){
+            LDR(toPadronize);
+        }else if(toPadronize[0] == "3" || toPadronize[0] == "D"){
+            STR_CMD(toPadronize); 
+        }else if(toPadronize[0] == "E"){
+            PUSH(toPadronize);
+        }else if(toPadronize[0] == "F"){
+            POP_HALT(toPadronize);
+        }else if(toPadronize[0] == "0" || toPadronize[0] == "1"){
+            JMP(toPadronize);
+        }else if(toPadronize[0] == "8"){
+            MOV(toPadronize);
+        }else{
+            if(toPadronize[2].length() >= 2){
+                throw invalid_argument("Instrução fora do escopo");
+            }
+            string aux = toPadronize[2];
+            toPadronize[2] = toPadronize[1];
+            toPadronize.push_back(aux);
+        }
+    }
+}        
 
 void charToBi(string& aux){
     if(aux == "A"){
