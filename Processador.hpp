@@ -92,6 +92,7 @@ public:
                 
                 POP(instrucoes[IR].substr(4, 12));
             }
+            regs[15]++;
         } 
         return NOP();
     } 
