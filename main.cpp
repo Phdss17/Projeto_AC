@@ -61,24 +61,20 @@ int main(int argc, char* argv[]){
         }
         instrucao = hex_binary(individual_words); 
         instrucoes.push_back(instrucao);
-        cout << instrucao << endl;
     }
+    entrada.close();
        
 
-    // Processador proc;
-    // try{
-    //     proc.run(instrucoes);
-    // }catch(const std::exception& e){
-    //     cerr << e.what() << endl;
-    // }
-
-    entrada.close();
-        
+    Processador proc;
     ofstream saida("results");
-
     if (!saida) {
         throw runtime_error("Não foi possível criar o arquivo.");
     }
+    try{
+        saida << proc.run(instrucoes);
+    }catch(const std::exception& e){
+        cerr << e.what() << endl;
+    }   
 
     saida.close();
 }

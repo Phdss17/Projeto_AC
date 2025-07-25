@@ -1,0 +1,24 @@
+Registradores:
+R0:     0x2
+R1:     0x0000
+R2:     0x3
+R3:     0x0000
+R4:     0x0000
+R5:     0x0000
+R6:     0x0000
+R7:     0x0000
+R8:     0x0000
+R9:     0x0000
+R10:     0x0000
+R11:     0x0000
+R12:     0x0000
+R13:     0x0000
+SP:     0x8000
+PC:     0x5
+
+Memoria de Dados:
+3: 0x0000
+
+Flags: 
+Z = 0
+C = 0

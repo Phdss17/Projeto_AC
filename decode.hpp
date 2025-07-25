@@ -179,13 +179,13 @@ void decToBi(string& num){
     }
 }
 
-size_t biToDec(string num){
+int biToDec(string num){
     queue<char> queue;
     for(int i = num.length()-1; i >= 0; i--){
         queue.push(num.at(i));
     }
     int aux;
-    size_t result = 0;
+    int result = 0;
     for(int i = 0; i < queue.size(); i++){
         if(queue.front() == '0'){ aux = 0; }else{ aux = 1; }
         queue.pop();
@@ -196,7 +196,7 @@ size_t biToDec(string num){
 
 string decToHex(size_t num){
     if(num == 0){
-        return "0";
+        return "0000";
     }
     stack<int> stack;
     while(num != 0){
