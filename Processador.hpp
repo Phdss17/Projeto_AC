@@ -13,9 +13,10 @@
 #define PROCESSADOR_HPP
 
 #include <vector>
-#include <utility>
 #include <stdexcept>
 #include "decode.hpp"
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ public:
     }
 
     string run(vector<string> instrucoes){
-        for(int i = 0; i < instrucoes.size(); i++){
+        while(true){
             IR = regs[15];
             string opcode = instrucoes[IR].substr(0, 4);
             if(opcode == "0000"){
@@ -42,11 +43,11 @@ public:
             }else if(opcode  == "0001"){
                 string cond = instrucoes[IR].substr(4, 2);
                 if(cond == "00"){
-                    if(!Z){
+                    if(Z){
                         JMP(instrucoes[IR].substr(5, 10));
                     }
                 }else if(cond == "01"){
-                    if(Z){
+                    if(!Z){
                         JMP(instrucoes[IR].substr(5, 10));
                     }
                 }if(cond == "10"){
@@ -81,18 +82,16 @@ public:
             }else if(opcode == "1100"){           
                 SHL(instrucoes[IR].substr(4, 12));
             }else if(opcode == "1101"){              
-                CMP(instrucoes[IR].substr(4, 12));
+                CMP(instrucoes[IR].substr(8, 8));
             }else if(opcode == "1110"){      
-                PUSH(instrucoes[IR].substr(4, 12));
+                PUSH(instrucoes[IR].substr(12, 4));
             }else if(opcode == "1111"){
-                if(instrucoes[IR].at(4) == '1'){
+                if(instrucoes[IR].substr(4, 12) == "111111111111"){
                     return NOP();
                 }
-                
                 POP(instrucoes[IR].substr(4, 12));
             }
             regs[15]++;
-            //cout << NOP();
         } 
         return NOP();
     } 
@@ -106,11 +105,18 @@ private:
     vector<int> positions;
 
     void JMP(string instruction){
-        int jmp = biToDec(instruction);
+        int jmp;
+        if(instruction.at(0) == '1'){
+            instruction = twoComplement(instruction);
+            jmp = biToDec(instruction) * (-1);
+        }else{
+            jmp = biToDec(instruction);
+        }
+        
         if(jmp == 0){
             cout << NOP();
         }else{
-            regs[15] = jmp;
+            regs[15] += jmp;
         }
     }
 
@@ -118,14 +124,30 @@ private:
         int destine = biToDec(instruction.substr(0, 4));
         int adress_mem =  biToDec(instruction.substr(4, 4));
 
-        regs[destine] = mem[adress_mem];
+        if(mem[adress_mem] = 61440){
+            char c;
+            cin >> c;
+            regs[destine] = static_cast<int>(c);
+        }else if(mem[adress_mem] = 61441){
+            int n;
+            cin >> n;
+            regs[destine] = n;
+        }else{
+            regs[destine] = mem[adress_mem];
+        }
     }
 
     void STR(string instruction){
         int adress_mem =  biToDec(instruction.substr(0, 4));
         int value = biToDec(instruction.substr(4, 4));
-        mem[regs[adress_mem]] = regs[value];
-        positions.push_back(regs[adress_mem]);
+        if(regs[value] == 61442){
+            cout << static_cast<char>(regs[adress_mem]);
+        }else if(regs[value] == 61443){
+            cout << regs[adress_mem];
+        }else{
+            mem[regs[adress_mem]] = regs[value];
+            positions.push_back(regs[adress_mem]);
+        }
     }
 
     void MOV(string instruction){
@@ -138,7 +160,7 @@ private:
     void ADD(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida1 = biToDec(instruction.substr(4, 4));
-        int saida2 = biToDec(instruction.substr(7, 4));
+        int saida2 = biToDec(instruction.substr(8, 4));
 
         regs[destino] = regs[saida1] + regs[saida2];
     }
@@ -154,15 +176,18 @@ private:
     void SUB(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida1 = biToDec(instruction.substr(4, 4));
-        int saida2 = biToDec(instruction.substr(7, 4));
+        int saida2 = biToDec(instruction.substr(8, 4));
 
         regs[destino] = regs[saida1] - regs[saida2];
+        if(regs[destino] < 0){
+            regs[destino] = regs[destino] * (-1);
+        }
     }
 
     void SUBI(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(7, 4));
+        int im = biToDec(instruction.substr(8, 4));
 
         regs[destino] = regs[saida] - im;
     }
@@ -170,7 +195,7 @@ private:
     void AND(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int op1 = regs[biToDec(instruction.substr(4, 4))];
-        int op2 = regs[biToDec(instruction.substr(7, 4))];
+        int op2 = regs[biToDec(instruction.substr(8, 4))];
         
         regs[destino] = op1 & op2;
     }
@@ -178,7 +203,7 @@ private:
     void OR(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int op1 = regs[biToDec(instruction.substr(4, 4))];
-        int op2 = regs[biToDec(instruction.substr(7, 4))];
+        int op2 = regs[biToDec(instruction.substr(8, 4))];
         
         regs[destino] = op1 | op2;
     }    
@@ -186,7 +211,7 @@ private:
     void SHR(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(7, 4));
+        int im = biToDec(instruction.substr(8, 4));
         string aux = to_string(regs[saida]);
         decToBi(aux);
 
@@ -203,7 +228,7 @@ private:
     void SHL(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(7, 4));
+        int im = biToDec(instruction.substr(8, 4));
         string aux = to_string(regs[saida]);
         decToBi(aux);
 
@@ -217,62 +242,71 @@ private:
     }
 
     void CMP(string instruction){
-        string cmp1 = instruction.substr(4, 4);
-        string cmp2 = instruction.substr(8, 4);
-        if(cmp1 == cmp2){
-            Z = false;
-        }else{
-            Z = true;
-        }
-
+        string cmp1 = instruction.substr(0, 4);
+        string cmp2 = instruction.substr(4, 4);
         int a = regs[biToDec(cmp1)]; 
         int b = regs[biToDec(cmp2)];
 
-        if(a < b){
-            C = false;
+        if(a == b){
+            Z = true;
         }else{
+            Z = false;
+        }
+
+        if(a < b){
             C = true;
+        }else{
+            C = false;
         }
     }
 
     void PUSH(string instruction){
         regs[14]--;
-        mem[regs[14]] = biToDec(instruction.substr(4, 8));
+        mem[regs[14]] = regs[biToDec(instruction)];
     }
 
     void POP(string instruction){
        int destino = biToDec(instruction.substr(0, 4));
 
        regs[destino] = mem[regs[14]];
-       regs[14]--;
+       regs[14]++;
     }
 
     string NOP(){
-        string out = "Registradores:\n";
-        for(int i = 0; i < 14; i++){
-            out += "R" + to_string(i) + ":     0x" + hexFormat(decToHex(regs[i])) + "\n";
+        std::stringstream out;
+    
+        out << "Registradores:\n";
+        for(int i = 0; i < 14; i++) {
+            out << "R" << i << ":" << std::setw(10 - std::to_string(i).size()) 
+                << "0x" << hexFormat(decToHex(regs[i])) << "\n";
         }
-        out += "SP:     0x" + hexFormat(decToHex(regs[14])) + "\n";
-        out += "PC:     0x" + hexFormat(decToHex(regs[15])) + "\n\n";
-        if(!positions.empty()){
-            out += "Memoria de Dados:\n";
-            for(auto position : positions){
-                out += hexFormat(decToHex(position)) + ": " + "0x" + hexFormat(decToHex(mem[position])) + "\n";
+    
+        out << "SP:" << std::setw(9) << "0x" << hexFormat(decToHex(regs[14])) << "\n"
+            << "PC:" << std::setw(9) << "0x" << hexFormat(decToHex(regs[15])) << "\n\n";
+    
+        if(!positions.empty()) {
+            out << "Memoria de Dados:\n";
+            for(auto position : positions) {
+                out << hexFormat(decToHex(position)) << ":" << std::setw(8)
+                    << "0x" << hexFormat(decToHex(mem[position])) << "\n";
             }
-            out += "\n";
+            out << "\n";
+        }
+ 
+        if(regs[14] != 32768) {
+            out << "Pilha: \n";
+            for(int i = regs[14]; i < 32768; i++) {
+                out << hexFormat(decToHex(i)) << ":" << std::setw(8)
+                    << "0x" << hexFormat(decToHex(mem[i])) << "\n";
+            }
+            out << "\n";
         }
 
-        if(regs[14] != 32768){
-            out += "Pilha: \n";
-            for(int i = regs[14]; i <= 32768; i++){
-                out += hexFormat(decToHex(i)) + ": " + "0x" + hexFormat(decToHex(mem[i])) + "\n";
-            }
-            out += "\n";
-        }
-
-        out += "Flags: \n";
-        out += "Z = " + string(Z ? "1" : "0") + "\nC = " + string(C ? "1" : "0") + "\n";
-        return out;
+            out << "Flags: \n"
+            << "Z = " << (Z ? "1" : "0") << "\n"
+            << "C = " << (C ? "1" : "0") << "\n";
+    
+        return out.str();
     }
 };
 

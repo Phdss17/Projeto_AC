@@ -39,14 +39,17 @@ void LDR(vector<string>& toPadronize){
 }
 
 void STR_CMD(vector<string>& toPadronize){
-    string aux = toPadronize[1];
+    string R1 = toPadronize[1];
+    string R2 = toPadronize[2];
+    toPadronize[2] = R1;
     toPadronize[1] = "0";
-    toPadronize.push_back(aux);
+    toPadronize.push_back(R2);
 }
 
 void PUSH(vector<string>& toPadronize){
     string aux = toPadronize[1];
-    toPadronize[1] = toPadronize[2] = "0";
+    toPadronize[1] = "0";
+    toPadronize.push_back("0");
     toPadronize.push_back(aux);
 }
 
@@ -278,6 +281,19 @@ string hex_binary(vector<string> toBinary){
         aux += toBinary[i];
     }
     return aux;
+}
+
+string twoComplement(string bi){
+    string inverted = "";
+    for(char c : bi){
+        inverted += (c == '0' ? "1" : "0");
+    }
+
+    int dec = biToDec(inverted);
+    dec++;
+    inverted = to_string(dec);
+    decToBi(inverted);
+    return inverted;
 }
 
 string hexFormat(string hex){

@@ -3,3 +3,15 @@ ADDI 2 0 2      6 2 0 2     0110.0010.0000.0010.
 MOV 10 10       4 A 0 A     0100.1010.0000.1010.
 STR 2 0         3 0 0 2     0011.0000.0000.0010.
 HALT            F F F F     1111.1111.1111.1111.
+
+
+
+main: MOV R0 , #3           4 0 0 3
+      MOV R1 , #5           4 1 0 5
+loop: ADD R2 , R1 , R0      5 2 1 0
+      PUSH R2               E 0 0 2
+      POP R10               F A 0 0
+      SUB R2 , R10 , R1     7 2 A 1
+      CMP R2 , R10          D 0 2 A     
+      JEQ loop              1 3 F A                 
+      HALT                  F F F F        

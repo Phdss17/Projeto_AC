@@ -8,6 +8,9 @@
 
 using namespace std;
 
+int loop;
+int count;
+
 vector<string> split_words(string txt){
     vector<string> words;
     string word = "";
@@ -16,7 +19,13 @@ vector<string> split_words(string txt){
         if(aux != ' ' && aux != ':' && aux != '#' && aux != '[' && aux != ']' && aux != ','){
             if(aux == 'x'){ word = ""; }else{ word += aux; }
         }else{
-            if(word != ""){ words.push_back(word); }
+            if(word != ""){
+            if(word == "loop"){
+                loop = count;
+            }else if(word != "main"){
+                words.push_back(word);
+            }
+            }
             word = "";
         }
     }
@@ -30,7 +39,7 @@ vector<string> split_words(string txt){
 int main(int argc, char* argv[]){
     vector<string> argumentos;
 
-    if( argc < 3 ){
+    if( argc < 2 ){
         std::cerr << "Erro: Numero incorreto de argumentos." << std::endl;
         return 1; 
     }
@@ -39,6 +48,7 @@ int main(int argc, char* argv[]){
     bool ishexa;
     string hexa = argv[2];
     ishexa = (hexa == "h");
+    count = 0;
     
     ifstream entrada(in);
 
@@ -50,9 +60,13 @@ int main(int argc, char* argv[]){
     vector<string> instrucoes;
     
     while (getline(entrada, line)) {
+        count++;
         vector<string> individual_words = split_words(line);
         string instrucao;
         if(!ishexa){ 
+            if(individual_words[0].at(0) == 'J'){
+                individual_words[1] = to_string(count - (loop-1));
+            }
             assembly_treat(individual_words);
             assembly_Hex(individual_words);
             toPadronize(individual_words);
@@ -66,7 +80,7 @@ int main(int argc, char* argv[]){
        
 
     Processador proc;
-    ofstream saida("results");
+    ofstream saida("results3A");
     if (!saida) {
         throw runtime_error("Não foi possível criar o arquivo.");
     }
