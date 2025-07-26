@@ -35,9 +35,8 @@ public:
 
     string run(vector<string> instrucoes){
         for(int i = 0; i < instrucoes.size(); i++){
-            string opcode = instrucoes[IR].substr(0, 4);
             IR = regs[15];
-            cout << regs[15] << " ";
+            string opcode = instrucoes[IR].substr(0, 4);
             if(opcode == "0000"){
                 JMP(instrucoes[IR].substr(4, 16)); 
             }else if(opcode  == "0001"){
@@ -62,12 +61,12 @@ public:
             }else if(opcode == "0010"){  
                 LDR(instrucoes[IR].substr(4, 8));
             }else if(opcode == "0011"){
-                STR(instrucoes[IR].substr(7, 8));
-            }else if(opcode == "0100"){  
+                STR(instrucoes[IR].substr(8, 8));
+            }else if(opcode == "0100"){
                 MOV(instrucoes[IR].substr(4, 12));
             }else if(opcode == "0101"){     
                 ADD(instrucoes[IR].substr(4, 12));
-            }else if(opcode == "0110"){    
+            }else if(opcode == "0110"){
                 ADDI(instrucoes[IR].substr(4, 12));
             }else if(opcode == "0111"){   
                 SUB(instrucoes[IR].substr(4, 12));
@@ -93,6 +92,7 @@ public:
                 POP(instrucoes[IR].substr(4, 12));
             }
             regs[15]++;
+            //cout << NOP();
         } 
         return NOP();
     } 
@@ -122,10 +122,10 @@ private:
     }
 
     void STR(string instruction){
-        int adress_mem =  biToDec(instruction.substr(4, 4));
-        int value = biToDec(instruction.substr(8, 4));
-        mem[adress_mem] = value;
-        positions.push_back(adress_mem);
+        int adress_mem =  biToDec(instruction.substr(0, 4));
+        int value = biToDec(instruction.substr(4, 4));
+        mem[regs[adress_mem]] = regs[value];
+        positions.push_back(regs[adress_mem]);
     }
 
     void MOV(string instruction){
@@ -146,7 +146,7 @@ private:
     void ADDI(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(7, 4));
+        int im = biToDec(instruction.substr(8, 4));
 
         regs[destino] = regs[saida] + im;
     }
@@ -250,14 +250,14 @@ private:
     string NOP(){
         string out = "Registradores:\n";
         for(int i = 0; i < 14; i++){
-            out += "R" + to_string(i) + ":     0x" + decToHex(regs[i]) + "\n";
+            out += "R" + to_string(i) + ":     0x" + hexFormat(decToHex(regs[i])) + "\n";
         }
-        out += "SP:     0x" + decToHex(regs[14]) + "\n";
-        out += "PC:     0x" + decToHex(regs[15]) + "\n\n";
+        out += "SP:     0x" + hexFormat(decToHex(regs[14])) + "\n";
+        out += "PC:     0x" + hexFormat(decToHex(regs[15])) + "\n\n";
         if(!positions.empty()){
             out += "Memoria de Dados:\n";
             for(auto position : positions){
-                out += decToHex(position) + ": " + "0x" + decToHex(mem[position]) + "\n";
+                out += hexFormat(decToHex(position)) + ": " + "0x" + hexFormat(decToHex(mem[position])) + "\n";
             }
             out += "\n";
         }
@@ -265,7 +265,7 @@ private:
         if(regs[14] != 32768){
             out += "Pilha: \n";
             for(int i = regs[14]; i <= 32768; i++){
-                out += decToHex(i) + ": " + "0x" + decToHex(mem[i]) + "\n";
+                out += hexFormat(decToHex(i)) + ": " + "0x" + hexFormat(decToHex(mem[i])) + "\n";
             }
             out += "\n";
         }

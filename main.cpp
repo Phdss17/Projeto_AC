@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
         }else{
             hex_treat(individual_words);
         }
-        instrucao = hex_binary(individual_words); 
+        instrucao = hex_binary(individual_words);
         instrucoes.push_back(instrucao);
     }
     entrada.close();

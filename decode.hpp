@@ -102,7 +102,7 @@ void toPadronize(vector<string>& toPadronize){
             POP_HALT(toPadronize);
         }else if(toPadronize[0] == "0" || toPadronize[0] == "1"){
             JMP(toPadronize);
-        }else if(toPadronize[0] == "8"){
+        }else if(toPadronize[0] == "4"){
             MOV(toPadronize);
         }else{
             if(toPadronize[2].length() >= 2){
@@ -181,12 +181,13 @@ void decToBi(string& num){
 
 int biToDec(string num){
     queue<char> queue;
-    for(int i = num.length()-1; i >= 0; i--){
+    for(int i = num.size()-1; i >= 0; i--){
         queue.push(num.at(i));
     }
-    int aux;
+
+    int aux = 0;
     int result = 0;
-    for(int i = 0; i < queue.size(); i++){
+    for(int i = 0; i < num.size(); i++){
         if(queue.front() == '0'){ aux = 0; }else{ aux = 1; }
         queue.pop();
         result += aux * (pow(2, i));
@@ -277,6 +278,15 @@ string hex_binary(vector<string> toBinary){
         aux += toBinary[i];
     }
     return aux;
+}
+
+string hexFormat(string hex){
+    if(hex.size() < 4){
+        for(int i = hex.size(); i < 4; i++){
+            hex = "0" + hex;
+        }
+    }
+    return hex;
 }
 
 #endif
