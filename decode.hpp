@@ -39,14 +39,17 @@ void LDR(vector<string>& toPadronize){
 }
 
 void STR_CMD(vector<string>& toPadronize){
-    string aux = toPadronize[1];
+    string R1 = toPadronize[1];
+    string R2 = toPadronize[2];
+    toPadronize[2] = R1;
     toPadronize[1] = "0";
-    toPadronize.push_back(aux);
+    toPadronize.push_back(R2);
 }
 
 void PUSH(vector<string>& toPadronize){
     string aux = toPadronize[1];
-    toPadronize[1] = toPadronize[2] = "0";
+    toPadronize[1] = "0";
+    toPadronize.push_back("0");
     toPadronize.push_back(aux);
 }
 
@@ -102,7 +105,7 @@ void toPadronize(vector<string>& toPadronize){
             POP_HALT(toPadronize);
         }else if(toPadronize[0] == "0" || toPadronize[0] == "1"){
             JMP(toPadronize);
-        }else if(toPadronize[0] == "8"){
+        }else if(toPadronize[0] == "4"){
             MOV(toPadronize);
         }else{
             if(toPadronize[2].length() >= 2){
@@ -179,14 +182,15 @@ void decToBi(string& num){
     }
 }
 
-size_t biToDec(string num){
+int biToDec(string num){
     queue<char> queue;
-    for(int i = num.length()-1; i >= 0; i--){
+    for(int i = num.size()-1; i >= 0; i--){
         queue.push(num.at(i));
     }
-    int aux;
-    size_t result = 0;
-    for(int i = 0; i < queue.size(); i++){
+
+    int aux = 0;
+    int result = 0;
+    for(int i = 0; i < num.size(); i++){
         if(queue.front() == '0'){ aux = 0; }else{ aux = 1; }
         queue.pop();
         result += aux * (pow(2, i));
@@ -196,7 +200,7 @@ size_t biToDec(string num){
 
 string decToHex(size_t num){
     if(num == 0){
-        return "0";
+        return "0000";
     }
     stack<int> stack;
     while(num != 0){
@@ -277,6 +281,28 @@ string hex_binary(vector<string> toBinary){
         aux += toBinary[i];
     }
     return aux;
+}
+
+string twoComplement(string bi){
+    string inverted = "";
+    for(char c : bi){
+        inverted += (c == '0' ? "1" : "0");
+    }
+
+    int dec = biToDec(inverted);
+    dec++;
+    inverted = to_string(dec);
+    decToBi(inverted);
+    return inverted;
+}
+
+string hexFormat(string hex){
+    if(hex.size() < 4){
+        for(int i = hex.size(); i < 4; i++){
+            hex = "0" + hex;
+        }
+    }
+    return hex;
 }
 
 #endif

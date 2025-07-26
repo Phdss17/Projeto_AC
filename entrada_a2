@@ -1,0 +1,9 @@
+main: MOV R0 , #3
+      MOV R1 , #5
+loop: ADD R2 , R1 , R0
+      PUSH R2
+      POP R10
+      SUB R2 , R10 , R1
+      CMP R2 , R10
+      JEQ loop
+      HALT

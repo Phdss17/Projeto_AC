@@ -17,7 +17,7 @@ SP:     0x8000
 PC:     0x0004
 
 Memoria de Dados:
-000A: 0x0005
+0005: 0x000A
 
 Flags: 
 Z = 0
