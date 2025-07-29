@@ -46,8 +46,6 @@ int main(int argc, char* argv[]){
 
     string in = argv[1];
     bool ishexa;
-    string hexa = argv[2];
-    ishexa = (hexa == "h");
     count = 0;
     
     ifstream entrada(in);
@@ -61,6 +59,9 @@ int main(int argc, char* argv[]){
     
     while (getline(entrada, line)) {
         vector<string> individual_words = split_words(line);
+        if(line.at(0) == '0' && count == 0){
+            ishexa = true;
+        }
         string instrucao;
         if(!ishexa){ 
             if(individual_words[0].at(0) == 'J'){
@@ -79,15 +80,5 @@ int main(int argc, char* argv[]){
     entrada.close();
 
     Processador proc;
-    ofstream saida("Results." + in);
-    if (!saida) {
-        throw runtime_error("Não foi possível criar o arquivo.");
-    }
-    try{
-        saida << proc.run(instrucoes);
-    }catch(const std::exception& e){
-        cerr << e.what() << endl;
-    }   
-
-    saida.close();
+    proc.run(instrucoes, in);
 }

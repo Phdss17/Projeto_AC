@@ -17,6 +17,7 @@
 #include "decode.hpp"
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -34,12 +35,21 @@ public:
         Z = C = false; 
     }
 
-    string run(vector<string> instrucoes){
+    void run(vector<string> instrucoes, string in){
+        ofstream saida("Results." + in);
+        if (!saida) {
+            throw runtime_error("Não foi possível criar o arquivo.");
+        }
+        try{ 
         while(true){
             IR = regs[15];//eh o pc
             string opcode = instrucoes[IR].substr(0, 4);
             if(opcode == "0000"){
-                JMP(instrucoes[IR].substr(4, 16)); 
+                if(instrucoes[IR].substr(4, 12) == "000000000000"){
+                    saida << NOP();
+                }else{
+                    JMP(instrucoes[IR].substr(4, 16)); 
+                }
             }else if(opcode  == "0001"){
                 string cond = instrucoes[IR].substr(4, 2);
                 if(cond == "00"){
@@ -62,7 +72,7 @@ public:
             }else if(opcode == "0010"){  
                 LDR(instrucoes[IR].substr(4, 8));
             }else if(opcode == "0011"){
-                STR(instrucoes[IR].substr(8, 8));
+                STR(instrucoes[IR].substr(6, 8));
             }else if(opcode == "0100"){
                 MOV(instrucoes[IR].substr(4, 12));
             }else if(opcode == "0101"){     
@@ -87,13 +97,17 @@ public:
                 PUSH(instrucoes[IR].substr(12, 4));
             }else if(opcode == "1111"){
                 if(instrucoes[IR].substr(4, 12) == "111111111111"){
-                    return NOP();
+                    saida << NOP();
+                    return;
                 }
                 POP(instrucoes[IR].substr(4, 12));
             }
             regs[15]++;
-        } 
-        return NOP();
+        }
+        saida.close();
+        }catch(const std::exception& e){
+            cerr << e.what() << endl;
+        }  
     } 
 
 private:
@@ -112,18 +126,12 @@ private:
         }else{
             jmp = biToDec(instruction);
         }
-        
-        if(jmp == 0){
-            cout << NOP();
-        }else{
-            regs[15] += jmp;
-        }
+        regs[15] += jmp;
     }
 
     void LDR(string instruction){
         int destine = biToDec(instruction.substr(0, 4));
         int adress_mem =  biToDec(instruction.substr(4, 4));
-
         if(mem[adress_mem] == 61440){
             char c;
             cin >> c;
@@ -133,7 +141,11 @@ private:
             cin >> n;
             regs[destine] = n & 0xFFFF;
         }else{
-            regs[destine] = mem[adress_mem];
+            if(adress_mem > 0xFFFF || adress_mem < 0x0000){
+                regs[destine] = 0;
+            }else{
+                regs[destine] = mem[adress_mem];
+            }
         }
     }
 
@@ -145,6 +157,9 @@ private:
         }else if(regs[value] == 61443){
             cout << (regs[value] & 0xFFFF);
         }else{
+            if(adress_mem > 0xFFFF || adress_mem < 0x0000){
+                return;
+            }
             mem[regs[adress_mem]] = regs[value];
             positions.push_back(regs[adress_mem]);
         }
@@ -320,6 +335,10 @@ private:
         } else {
             C = (result > 0xFFFF);
         }
+    }
+
+    void write(){
+    
     }
 };
 #endif
