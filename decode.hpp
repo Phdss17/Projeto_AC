@@ -198,7 +198,7 @@ int biToDec(string num){
     return result;
 } 
 
-string decToHex(size_t num){
+string decToHex(int num){
     if(num == 0){
         return "0000";
     }
@@ -304,5 +304,4 @@ string hexFormat(string hex){
     }
     return hex;
 }
-
 #endif

@@ -29,14 +29,14 @@ public:
     Processador() {
         regs.resize(16, 0);
         mem.resize(32769, 0);
-        regs[14] = 32768;
+        regs[14] = 32768;//ponteiro para pilha
         IR = 0;
         Z = C = false; 
     }
 
     string run(vector<string> instrucoes){
         while(true){
-            IR = regs[15];
+            IR = regs[15];//eh o pc
             string opcode = instrucoes[IR].substr(0, 4);
             if(opcode == "0000"){
                 JMP(instrucoes[IR].substr(4, 16)); 
@@ -99,7 +99,7 @@ public:
 private:
     vector<int> regs;
     vector<int> mem;
-    size_t IR;
+    int IR;
     bool Z;
     bool C;
     vector<int> positions;
@@ -124,14 +124,14 @@ private:
         int destine = biToDec(instruction.substr(0, 4));
         int adress_mem =  biToDec(instruction.substr(4, 4));
 
-        if(mem[adress_mem] = 61440){
+        if(mem[adress_mem] == 61440){
             char c;
             cin >> c;
-            regs[destine] = static_cast<int>(c);
-        }else if(mem[adress_mem] = 61441){
+            regs[destine] = static_cast<int>(c) & 0xFF;
+        }else if(mem[adress_mem] == 61441){
             int n;
             cin >> n;
-            regs[destine] = n;
+            regs[destine] = n & 0xFFFF;
         }else{
             regs[destine] = mem[adress_mem];
         }
@@ -141,9 +141,9 @@ private:
         int adress_mem =  biToDec(instruction.substr(0, 4));
         int value = biToDec(instruction.substr(4, 4));
         if(regs[value] == 61442){
-            cout << static_cast<char>(regs[adress_mem]);
+            cout << static_cast<char>(regs[adress_mem] & 0xFF);
         }else if(regs[value] == 61443){
-            cout << regs[adress_mem];
+            cout << (regs[value] & 0xFFFF);
         }else{
             mem[regs[adress_mem]] = regs[value];
             positions.push_back(regs[adress_mem]);
@@ -162,15 +162,21 @@ private:
         int saida1 = biToDec(instruction.substr(4, 4));
         int saida2 = biToDec(instruction.substr(8, 4));
 
-        regs[destino] = regs[saida1] + regs[saida2];
+        int resultado = regs[saida1] + regs[saida2];
+
+        updateFlags(resultado);
+        regs[destino] = resultado & 0xFFFF;
     }
 
     void ADDI(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int saida = biToDec(instruction.substr(4, 4));
         int im = biToDec(instruction.substr(8, 4));
+        int resultado = regs[saida] + im;
 
-        regs[destino] = regs[saida] + im;
+    
+        updateFlags(resultado);
+        regs[destino] = resultado & 0xFFFF;
     }
 
     void SUB(string instruction){
@@ -178,10 +184,10 @@ private:
         int saida1 = biToDec(instruction.substr(4, 4));
         int saida2 = biToDec(instruction.substr(8, 4));
 
-        regs[destino] = regs[saida1] - regs[saida2];
-        if(regs[destino] < 0){
-            regs[destino] = regs[destino] * (-1);
-        }
+        int resultado = regs[saida1] - regs[saida2];
+
+        updateFlags(resultado, true);
+        regs[destino] = resultado & 0xFFFF;
     }
 
     void SUBI(string instruction){
@@ -189,87 +195,84 @@ private:
         int saida = biToDec(instruction.substr(4, 4));
         int im = biToDec(instruction.substr(8, 4));
 
-        regs[destino] = regs[saida] - im;
+        int resultado = regs[saida] - im;
+
+        updateFlags(resultado, true);
+        regs[destino] = resultado & 0xFFFF;
     }
 
     void AND(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int op1 = regs[biToDec(instruction.substr(4, 4))];
         int op2 = regs[biToDec(instruction.substr(8, 4))];
-        
-        regs[destino] = op1 & op2;
+        int resultado = regs[op1] & regs[op2];
+
+        Z = (resultado == 0);
+        C = false;
+
+        regs[destino] = resultado;
     }
 
     void OR(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
         int op1 = regs[biToDec(instruction.substr(4, 4))];
         int op2 = regs[biToDec(instruction.substr(8, 4))];
-        
-        regs[destino] = op1 | op2;
+        int resultado = regs[op1] | regs[op2];
+
+        Z = (resultado == 0);
+        C = false;
+
+        regs[destino] = resultado;
     }    
 
     void SHR(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
-        int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(8, 4));
-        string aux = to_string(regs[saida]);
-        decToBi(aux);
+        int op = biToDec(instruction.substr(4, 4));
+        int shift = biToDec(instruction.substr(8, 4));
+        int valor = regs[op];
 
-        string result = aux.substr(0, im);
-        aux = "";
-        for(int i = 0; i < im; i++){
-            aux += "0";
-        }
+        C = (valor >> (shift - 1)) & 1;
 
-        result += aux + result;
-        regs[destino] = biToDec(result);
+        regs[destino] = valor >> shift;
+
+        Z = (regs[destino] == 0);
     }
 
     void SHL(string instruction){
         int destino = biToDec(instruction.substr(0, 4));
-        int saida = biToDec(instruction.substr(4, 4));
-        int im = biToDec(instruction.substr(8, 4));
-        string aux = to_string(regs[saida]);
-        decToBi(aux);
+        int Rn = biToDec(instruction.substr(4, 4));
+        int shift = biToDec(instruction.substr(8, 4));
+        int valor = regs[Rn];
 
-        string result = aux.substr(aux.length() - im, aux.length());
-        aux = "";
-        for(int i = 0; i < im; i++){
-            aux += "0";
-        }
-        result += result + aux;
-        regs[destino] = biToDec(result);
+        C = (valor >> (16 - shift)) & 1;
+
+        regs[destino] = (valor << shift) & 0xFFFF;
+
+        Z = (regs[destino] == 0);
     }
 
     void CMP(string instruction){
-        string cmp1 = instruction.substr(0, 4);
-        string cmp2 = instruction.substr(4, 4);
-        int a = regs[biToDec(cmp1)]; 
-        int b = regs[biToDec(cmp2)];
+        int op1 = biToDec(instruction.substr(0, 4));
+        int op2 = biToDec(instruction.substr(4, 4));
+        int diff = regs[op1] - regs[op2];
 
-        if(a == b){
-            Z = true;
-        }else{
-            Z = false;
-        }
-
-        if(a < b){
-            C = true;
-        }else{
-            C = false;
-        }
+        updateFlags(diff, true);
     }
 
     void PUSH(string instruction){
-        regs[14]--;
-        mem[regs[14]] = regs[biToDec(instruction)];
+        if(regs[14] > 32752){
+            regs[14] -= 2;
+            mem[regs[14]] = regs[biToDec(instruction)];
+        }
     }
 
     void POP(string instruction){
-       int destino = biToDec(instruction.substr(0, 4));
+        if(regs[14] != 32768){
+            int destino = biToDec(instruction.substr(0, 4));
 
-       regs[destino] = mem[regs[14]];
-       regs[14]++;
+            regs[destino] = mem[regs[14]];
+            regs[14] += 2;
+        }
     }
 
     string NOP(){
@@ -295,7 +298,7 @@ private:
  
         if(regs[14] != 32768) {
             out << "Pilha: \n";
-            for(int i = regs[14]; i < 32768; i++) {
+            for(int i = regs[14]; i < 32768; i += 2) {
                 out << hexFormat(decToHex(i)) << ":" << std::setw(8)
                     << "0x" << hexFormat(decToHex(mem[i])) << "\n";
             }
@@ -308,6 +311,15 @@ private:
     
         return out.str();
     }
-};
 
+    void updateFlags(int result, bool isSubtraction = false) {
+        Z = (result == 0);
+        
+        if (isSubtraction) {
+            C = (result < 0);
+        } else {
+            C = (result > 0xFFFF);
+        }
+    }
+};
 #endif
