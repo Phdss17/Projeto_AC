@@ -60,12 +60,11 @@ int main(int argc, char* argv[]){
     vector<string> instrucoes;
     
     while (getline(entrada, line)) {
-        count++;
         vector<string> individual_words = split_words(line);
         string instrucao;
         if(!ishexa){ 
             if(individual_words[0].at(0) == 'J'){
-                individual_words[1] = to_string(count - (loop-1));
+                individual_words[1] = to_string(count - loop);
             }
             assembly_treat(individual_words);
             assembly_Hex(individual_words);
@@ -75,12 +74,12 @@ int main(int argc, char* argv[]){
         }
         instrucao = hex_binary(individual_words);
         instrucoes.push_back(instrucao);
+        count++;
     }
     entrada.close();
-       
 
     Processador proc;
-    ofstream saida("results3A");
+    ofstream saida("Results." + in);
     if (!saida) {
         throw runtime_error("Não foi possível criar o arquivo.");
     }
