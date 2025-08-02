@@ -38,7 +38,7 @@ SP:       0x8000
 PC:       0x0005
 
 Memoria de Dados:
-000A:      0x0005
+0003:      0x0005
 
 Flags: 
 Z = 0

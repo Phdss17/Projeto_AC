@@ -72,7 +72,7 @@ public:
             }else if(opcode == "0010"){  
                 LDR(instrucoes[IR].substr(4, 8));
             }else if(opcode == "0011"){
-                STR(instrucoes[IR].substr(6, 8));
+                STR(instrucoes[IR], saida);
             }else if(opcode == "0100"){
                 MOV(instrucoes[IR].substr(4, 12));
             }else if(opcode == "0101"){     
@@ -130,38 +130,40 @@ private:
     }
 
     void LDR(string instruction){
-        int destine = biToDec(instruction.substr(0, 4));
-        int adress_mem =  biToDec(instruction.substr(4, 4));
-        if(mem[adress_mem] == 61440){
+        int rd = biToDec(instruction.substr(0, 4));
+        int rm =  biToDec(instruction.substr(4, 4));
+        int address_mem = regs[rd];
+        if(address_mem >= mem.size()){
+            regs[rm] = 0;
+            return;
+        }
+        if(address_mem == 61440){
             char c;
             cin >> c;
-            regs[destine] = static_cast<int>(c) & 0xFF;
-        }else if(mem[adress_mem] == 61441){
+            regs[rd] = static_cast<int>(c) & 0xFF;
+        }else if(address_mem == 61441){
             int n;
             cin >> n;
-            regs[destine] = n & 0xFFFF;
+            regs[rd] = n & 0xFFFF;
         }else{
-            if(adress_mem > 0xFFFF || adress_mem < 0x0000){
-                regs[destine] = 0;
-            }else{
-                regs[destine] = mem[adress_mem];
-            }
+            regs[rd] = mem[address_mem] & 0xFFFF;
         }
     }
 
-    void STR(string instruction){
-        int adress_mem =  biToDec(instruction.substr(0, 4));
-        int value = biToDec(instruction.substr(4, 4));
-        if(regs[value] == 61442){
-            cout << static_cast<char>(regs[adress_mem] & 0xFF);
-        }else if(regs[value] == 61443){
-            cout << (regs[value] & 0xFFFF);
+    void STR(string instruction, ostream& saida){
+        int rm =  biToDec(instruction.substr(4, 4));
+        int rn = biToDec(instruction.substr(12, 4));
+        int address_mem = regs[rm];
+        if (address_mem >= mem.size()) {
+            return;
+        }
+        if(address_mem == 61442){
+            saida << "[CHAR OUT] = " << static_cast<char>(mem[address_mem] & 0xFF) << endl;
+        }else if(address_mem == 61443){
+            saida << "[INT OUT] = " << (mem[address_mem] & 0xFFFF) << endl;
         }else{
-            if(adress_mem > 0xFFFF || adress_mem < 0x0000){
-                return;
-            }
-            mem[regs[adress_mem]] = regs[value];
-            positions.push_back(regs[adress_mem]);
+            mem[address_mem] = regs[rn] & 0xFFFF;
+            positions.push_back(address_mem);
         }
     }
 
@@ -335,10 +337,6 @@ private:
         } else {
             C = (result > 0xFFFF);
         }
-    }
-
-    void write(){
-    
     }
 };
 #endif
