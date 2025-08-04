@@ -1,4 +1,4 @@
-C++
+# C++
 Projeto final da cadeira arquitetura de computadores
 
 Compile com: g++ -o (executavel) main.cpp 
